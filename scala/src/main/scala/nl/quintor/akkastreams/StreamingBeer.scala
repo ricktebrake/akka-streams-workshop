@@ -7,8 +7,7 @@ object BeerStyle extends Enumeration {
 
 import akka.actor.ActorSystem
 import akka.stream.ClosedShape
-import akka.stream.scaladsl.GraphDSL.Implicits.{SourceArrow, fanOut2flow}
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, RunnableGraph, Sink, Source}
+import akka.stream.scaladsl.{GraphDSL, RunnableGraph}
 import nl.quintor.akkastreams.BeerStyle._
 
 object StreamingBeer extends App {

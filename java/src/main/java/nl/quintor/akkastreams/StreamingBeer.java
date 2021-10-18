@@ -1,20 +1,11 @@
 package nl.quintor.akkastreams;
 
-import akka.Done;
 import akka.actor.ActorSystem;
 import akka.stream.ClosedShape;
-import akka.stream.Outlet;
-import akka.stream.UniformFanOutShape;
-import akka.stream.javadsl.Broadcast;
-import akka.stream.javadsl.Flow;
 import akka.stream.javadsl.GraphDSL;
 import akka.stream.javadsl.RunnableGraph;
-import akka.stream.javadsl.Sink;
-import akka.stream.javadsl.Source;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
-import scala.Tuple2;
 
 public class StreamingBeer {
 
@@ -50,7 +41,6 @@ public class StreamingBeer {
      * - No alcohol-free beers ( < 0.5% )
      * - A menu item contains name, brewery, abv and price
      */
-
     RunnableGraph.fromGraph(
         GraphDSL.create(builder -> {
           return ClosedShape.getInstance();
