@@ -50,58 +50,9 @@ public class StreamingBeer {
      * - No alcohol-free beers ( < 0.5% )
      * - A menu item contains name, brewery, abv and price
      */
-    var beerSource = Source.from(beers).filter(beer -> beer.getAbv() >= 0.5);
-
-    var calculateImportTax = Flow.of(Beer.class).map(beer -> {
-      if (beer.getCountry().equals("UK") || beer.getCountry().equals("US")) {
-        return beer.withPrice(beer.getPrice().multiply(BigDecimal.valueOf(1.3)));
-      } else {
-        return beer.withPrice(beer.getPrice().multiply(BigDecimal.valueOf(1.1)));
-      }
-    });
-
-    var bockDiscount = Flow.of(Beer.class).map(beer -> {
-      if (beer.getStyle().equals(BeerStyle.Bock)) {
-        return beer.withPrice(beer.getPrice().multiply(BigDecimal.valueOf(0.9)));
-      } else {
-        return beer;
-      }
-    });
-
-    var averagePrice = Flow.of(Beer.class).fold(Tuple2.apply(BigDecimal.ZERO, 0),
-            (result, beer) -> Tuple2.apply(result._1.add(beer.getPrice()), result._2 + 1))
-        .map(total -> total._1.divide(BigDecimal.valueOf(total._2)));
-
-    var highestAbv = Flow.of(Beer.class)
-        .fold((double) 0, (highAbv, beer) -> beer.getAbv() > highAbv ? beer.getAbv() : highAbv);
-
-    var generateMenuItem = Flow.of(Beer.class).groupBy(10, Beer::getStyle)
-        .map(beer -> String.format("%s \t| Brouwerij: %s \t| ABV: %s \t| Prijs: %s", beer.getName(),
-            beer.getBrewery(), beer.getAbv(), beer.getPrice()))
-        .reduce((menu, item) -> menu + "\n" + item).map(menu -> menu + "\n");
-
-    Sink<Object, CompletionStage<Done>> printToConsole = Sink.foreach(System.out::println);
 
     RunnableGraph.fromGraph(
         GraphDSL.create(builder -> {
-          final UniformFanOutShape<Beer, Beer> bcast1 = builder.add(Broadcast.create(2));
-          final UniformFanOutShape<Beer, Beer> bcast2 = builder.add(Broadcast.create(2));
-
-          Outlet<Beer> source = builder.add(beerSource).out();
-          builder.from(source)
-              .via(builder.add(calculateImportTax))
-              .via(builder.add(bockDiscount))
-              .viaFanOut(bcast1)
-              .via(builder.add(generateMenuItem.mergeSubstreams()))
-              .to(builder.add(printToConsole));
-          builder.from(bcast1)
-              .viaFanOut(bcast2)
-              .via(builder.add(averagePrice))
-              .to(builder.add(printToConsole));
-          builder.from(bcast2)
-              .via(builder.add(highestAbv))
-              .to(builder.add(printToConsole));
-
           return ClosedShape.getInstance();
         })).run(system);
   }
