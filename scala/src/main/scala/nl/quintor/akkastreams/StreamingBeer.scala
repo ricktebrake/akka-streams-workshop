@@ -30,7 +30,19 @@ object StreamingBeer extends App {
     Beer("Premium 1664", "Kronenbourg", "FR", BeerStyle.Lager, 5.5, 2.00)
   )
 
-
+  /**
+   * Create a stream to process the list of beers using the GraphDSL
+   * The stream should have the following outputs:
+   * - A formatted menu of the beers grouped by style
+   * - A small report with the average price of all beers and the beer with the highest ABV
+   *
+   * The following rules apply
+   * - All beers from UK and US get a 30% price increase
+   * - All beers from other countries get a 10% price increase
+   * - All bock beers are discounted with 10%
+   * - No alcohol-free beers ( < 0.5% )
+   * - A menu item contains name, brewery, abv and price
+   */
   RunnableGraph.fromGraph(GraphDSL.create() {
     implicit builder =>
 
@@ -66,12 +78,8 @@ object StreamingBeer extends App {
       bcast1 ~> bcast2 ~> averagePrice ~> printToConsole
       bcast2 ~> highestAbv ~> printToConsole
 
-
       ClosedShape
   }).run()
-
-
 }
-
 
 case class Beer(name: String, brewery: String, country: String, style: BeerStyle, abv: Double, price: BigDecimal)
